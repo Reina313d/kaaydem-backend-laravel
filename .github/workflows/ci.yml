@@ -1,0 +1,56 @@
+name: CI Backend Laravel
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_DATABASE: kaaydem_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Installation de PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, dom, fileinfo, mysql, pdo_mysql
+          coverage: none
+
+      - name: Copier le fichier .env
+        run: cp .env.example .env
+
+      - name: Installer les dependances Composer
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Generer la cle d'application
+        run: php artisan key:generate
+
+      - name: Configurer la connexion MySQL de test
+        run: |
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_DATABASE=kaaydem/DB_DATABASE=kaaydem_test/' .env
+
+      - name: Executer les migrations
+        run: php artisan migrate --force
+
+      - name: Executer les tests (PHPUnit)
+        run: php artisan test

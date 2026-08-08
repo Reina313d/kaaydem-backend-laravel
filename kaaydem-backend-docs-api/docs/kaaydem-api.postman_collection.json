@@ -1,0 +1,349 @@
+{
+  "info": {
+    "name": "Kaay Dem ! — API v1",
+    "description": "Collection Postman de l'API REST de la plateforme de covoiturage étudiant Kaay Dem ! (ISEP Diamniadio).\n\nAuthentification : Bearer token (Laravel Sanctum). Connectez-vous via 'Authentification > Connexion' puis le token est stocké automatiquement dans la variable {{token}} (script de test), utilisé par toutes les requêtes protégées.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api/v1", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "trip_id", "value": "1", "type": "string" },
+    { "key": "reservation_id", "value": "1", "type": "string" },
+    { "key": "user_id", "value": "1", "type": "string" },
+    { "key": "report_id", "value": "1", "type": "string" },
+    { "key": "driver_request_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Authentification",
+      "item": [
+        {
+          "name": "Inscription",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Awa Sarr\",\n  \"email\": \"awa.sarr@isep.sn\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"telephone\": \"771234567\",\n  \"campus\": \"Diamniadio\"\n}"
+            },
+            "auth": { "type": "noauth" }
+          },
+          "response": []
+        },
+        {
+          "name": "Connexion",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('token', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"passager1@kaaydem.sn\",\n  \"password\": \"password\"\n}"
+            },
+            "auth": { "type": "noauth" }
+          },
+          "response": []
+        },
+        {
+          "name": "Déconnexion",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/logout"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Profil",
+      "item": [
+        {
+          "name": "Voir mon profil",
+          "request": { "method": "GET", "url": "{{base_url}}/me" },
+          "response": []
+        },
+        {
+          "name": "Modifier mon profil",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nom\": \"Awa Sarr\",\n  \"telephone\": \"771234567\",\n  \"campus\": \"Rufisque\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Demander le statut conducteur",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/driver-requests",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numero_permis\": \"SN-12345AB\",\n  \"vehicule_marque\": \"Toyota\",\n  \"vehicule_modele\": \"Corolla\",\n  \"vehicule_immatriculation\": \"DK-1234-AB\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consulter ma demande conducteur",
+          "request": { "method": "GET", "url": "{{base_url}}/driver-requests/me" },
+          "response": []
+        },
+        {
+          "name": "Signaler un utilisateur",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"utilisateur_signale_id\": {{user_id}},\n  \"motif\": \"Le conducteur ne s'est pas présenté au point de rendez-vous.\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Trajets",
+      "item": [
+        {
+          "name": "Rechercher des trajets (public)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/trips?depart=Dakar&arrivee=Diamniadio&date=2026-08-01&prix_max=2000&places_min=1&tri=date_heure_depart&direction=asc&par_page=10",
+              "host": ["{{base_url}}"],
+              "path": ["trips"],
+              "query": [
+                { "key": "depart", "value": "Dakar" },
+                { "key": "arrivee", "value": "Diamniadio" },
+                { "key": "date", "value": "2026-08-01" },
+                { "key": "prix_max", "value": "2000" },
+                { "key": "places_min", "value": "1" },
+                { "key": "tri", "value": "date_heure_depart" },
+                { "key": "direction", "value": "asc" },
+                { "key": "par_page", "value": "10" }
+              ]
+            },
+            "auth": { "type": "noauth" }
+          },
+          "response": []
+        },
+        {
+          "name": "Détail d'un trajet (public)",
+          "request": { "method": "GET", "url": "{{base_url}}/trips/{{trip_id}}", "auth": { "type": "noauth" } },
+          "response": []
+        },
+        {
+          "name": "Publier un trajet (conducteur validé)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/trips",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ville_depart\": \"Dakar\",\n  \"ville_arrivee\": \"Diamniadio\",\n  \"points_arret\": [\"Rufisque\"],\n  \"date_heure_depart\": \"2026-08-15T08:00:00\",\n  \"places_totales\": 3,\n  \"prix_place\": 1500\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Modifier un trajet",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/trips/{{trip_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prix_place\": 2000\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Annuler un trajet",
+          "request": { "method": "DELETE", "url": "{{base_url}}/trips/{{trip_id}}" },
+          "response": []
+        },
+        {
+          "name": "Clôturer un trajet",
+          "request": { "method": "PATCH", "url": "{{base_url}}/trips/{{trip_id}}/close" },
+          "response": []
+        },
+        {
+          "name": "Mes trajets (conducteur)",
+          "request": { "method": "GET", "url": "{{base_url}}/me/trips" },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Réservations",
+      "item": [
+        {
+          "name": "Réserver un trajet",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/trips/{{trip_id}}/reservations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre_places\": 1\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Accepter une réservation (conducteur)",
+          "request": { "method": "PATCH", "url": "{{base_url}}/reservations/{{reservation_id}}/accept" },
+          "response": []
+        },
+        {
+          "name": "Refuser une réservation (conducteur)",
+          "request": { "method": "PATCH", "url": "{{base_url}}/reservations/{{reservation_id}}/refuse" },
+          "response": []
+        },
+        {
+          "name": "Annuler une réservation",
+          "request": { "method": "PATCH", "url": "{{base_url}}/reservations/{{reservation_id}}/cancel" },
+          "response": []
+        },
+        {
+          "name": "Mes réservations (passager)",
+          "request": { "method": "GET", "url": "{{base_url}}/me/reservations" },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Évaluations",
+      "item": [
+        {
+          "name": "Évaluer le conducteur",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/reservations/{{reservation_id}}/review",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": 5,\n  \"commentaire\": \"Trajet agréable, conducteur ponctuel.\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Administration",
+      "item": [
+        {
+          "name": "Liste des utilisateurs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/users?recherche=&par_page=15",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"],
+              "query": [
+                { "key": "recherche", "value": "" },
+                { "key": "par_page", "value": "15" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Activer / désactiver un utilisateur",
+          "request": { "method": "PATCH", "url": "{{base_url}}/admin/users/{{user_id}}/toggle-active" },
+          "response": []
+        },
+        {
+          "name": "Liste des signalements",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/reports?statut=ouvert&par_page=15",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "reports"],
+              "query": [
+                { "key": "statut", "value": "ouvert" },
+                { "key": "par_page", "value": "15" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Traiter un signalement",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/admin/reports/{{report_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut\": \"resolu\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Liste des demandes conducteur",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/admin/driver-requests?statut=en_attente&par_page=15",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "driver-requests"],
+              "query": [
+                { "key": "statut", "value": "en_attente" },
+                { "key": "par_page", "value": "15" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Valider / rejeter une demande conducteur",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/admin/driver-requests/{{driver_request_id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"statut_validation\": \"valide\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Statistiques du tableau de bord",
+          "request": { "method": "GET", "url": "{{base_url}}/admin/stats" },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
